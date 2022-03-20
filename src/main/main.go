@@ -3,6 +3,7 @@ package main
 import (
 	"bufio"
 	"encoding/json"
+	"flag"
 	"fmt"
 	"io"
 	"os"
@@ -18,12 +19,17 @@ type wrInfo struct {
 }
 
 func main() {
+
+	path := flag.String("path", "/home/gavin/", "log日志路径")
+	outPath := flag.String("outPath", "/home/gavin/out.txt", "输出文件路径") //eg:/home/gavin/桌面/Kmeans/slave2/res.txt
+	//解析命令行参数
+	flag.Parse()
 	//resolute := make([]wrInfo, 0)
 	//nodeList := make(map[string]bool)
 	// 1.打开一个文件
 	// 注意: 文件不存在不会创建, 会报错
 	// 注意: 通过Open打开只能读取, 不能写入
-	fpSrc, err := os.Open("/home/gavin/桌面/Kmeans/slave2/hadoop-root-datanode-slave2.log.0")
+	fpSrc, err := os.Open(*path)
 	if err != nil {
 		fmt.Println(err)
 	}
@@ -37,7 +43,7 @@ func main() {
 	}()
 
 	// 1.打开文件
-	fpDest, err := os.OpenFile("/home/gavin/桌面/Kmeans/slave2/res.txt", os.O_CREATE|os.O_APPEND|os.O_RDWR, 0666)
+	fpDest, err := os.OpenFile(*outPath, os.O_CREATE|os.O_APPEND|os.O_RDWR, 0666)
 	if err != nil {
 		fmt.Println(err)
 	}
@@ -76,7 +82,13 @@ func main() {
 				fmt.Println(err2)
 			}
 			_, err := w.Write(info)
-			w.WriteString("\n")
+			_, err = w.WriteString("\n")
+			if err != nil {
+				return
+			}
+			if err != nil {
+				return
+			}
 			if err != nil {
 				fmt.Println(err)
 			}
@@ -108,7 +120,10 @@ func main() {
 				fmt.Println(err2)
 			}
 			_, err := w.Write(info)
-			w.WriteString("\n")
+			_, err = w.WriteString("\n")
+			if err != nil {
+				return
+			}
 			if err != nil {
 				fmt.Println(err)
 			}
