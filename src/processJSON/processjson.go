@@ -107,5 +107,25 @@ func main() {
 			w.WriteByte('\n')
 		}
 		w.Flush()
+		mapfd, maperr := os.OpenFile(strings.TrimRight(file, ".json")+"Map.json", os.O_CREATE|os.O_APPEND|os.O_RDWR, 0666)
+		if maperr != nil {
+			fmt.Println(maperr)
+		}
+		defer func() {
+			mapcloseerr := mapfd.Close()
+			if mapcloseerr != nil {
+				fmt.Println(mapcloseerr)
+			}
+		}()
+		kv := make(map[string]string)
+		wmap := bufio.NewWriter(mapfd)
+		for _, info := range infoList {
+			kv[info.BlockId] = info.DestIp
+		}
+		mapjson, _ := json.Marshal(kv)
+		wmap.WriteString(string(mapjson))
+		wmap.WriteByte('\n')
+		w.Flush()
+
 	}
 }
