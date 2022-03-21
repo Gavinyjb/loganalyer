@@ -19,6 +19,10 @@ type wrInfo struct {
 	Wr        string `json:"读/写"`
 	DestIp    string `json:"目的IP"`
 }
+type kv struct {
+	BlockId string `json:"块ID"`
+	DestIp  string `json:"目的IP"`
+}
 
 func main() {
 
@@ -107,7 +111,7 @@ func main() {
 			w.WriteByte('\n')
 		}
 		w.Flush()
-		mapfd, maperr := os.OpenFile(strings.TrimRight(file, ".json")+"Map.json", os.O_CREATE|os.O_APPEND|os.O_RDWR, 0666)
+		mapfd, maperr := os.OpenFile(strings.TrimRight(file, ".json")+"KV.json", os.O_CREATE|os.O_APPEND|os.O_RDWR, 0666)
 		if maperr != nil {
 			fmt.Println(maperr)
 		}
@@ -117,15 +121,21 @@ func main() {
 				fmt.Println(mapcloseerr)
 			}
 		}()
-		kv := make(map[string]string)
+		k_v := make([]kv, 0)
 		wmap := bufio.NewWriter(mapfd)
 		for _, info := range infoList {
-			kv[info.BlockId] = info.DestIp
+			k_v = append(k_v, kv{info.BlockId, info.DestIp})
 		}
-		mapjson, _ := json.Marshal(kv)
-		wmap.WriteString(string(mapjson))
+		mapjson, err := json.Marshal(k_v)
+		if err != nil {
+			fmt.Println(err)
+		}
+		_, wrerr := wmap.WriteString(string(mapjson))
+		if wrerr != nil {
+			fmt.Println(wrerr)
+		}
 		wmap.WriteByte('\n')
-		w.Flush()
+		wmap.Flush()
 
 	}
 }
