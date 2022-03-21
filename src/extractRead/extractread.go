@@ -12,7 +12,7 @@ import (
 
 func main() {
 	srcpath := flag.String("srcpath", "/home/gavin", "json文件所在目录")
-	outpath := flag.String("outpath", "/home/gavin/extractread.txt", "提取读块文件流目录")
+	outpath := flag.String("outpath", "/home/gavin/extractread.json", "提取读块文件流目录")
 	flag.Parse()
 	var files []string
 	err := filepath.Walk(*srcpath, func(path string, info os.FileInfo, err error) error {
@@ -36,7 +36,8 @@ func main() {
 	}()
 	w := bufio.NewWriter(fdout)
 	for i := range files {
-		file := files[len(files)-i-1]
+		//file := files[len(files)-i-1] //文件名字逆序读取
+		file := files[i]
 		fd, err2 := os.Open(file)
 		if err2 != nil {
 			fmt.Println("打开文件报错")
