@@ -1,10 +1,20 @@
 修改为输入log所在目录
-eg： ./main -srcpath=/home/gavin/桌面/Kmeans/slave2
+eg：go run log.go -srcpath=/home/gavin/project01/Kmeans/slave2
 输入为：
-/home/gavin/桌面/Kmeans/slave2/hadoop-root-datanode-slave2.log.0
-/home/gavin/桌面/Kmeans/slave2/hadoop-root-datanode-slave2.log.1
-/home/gavin/桌面/Kmeans/slave2/hadoop-root-datanode-slave2.log.2
+/home/gavin/project01/Kmeans/slave2/hadoop-root-datanode-slave2.log.0
+/home/gavin/project01/Kmeans/slave2/hadoop-root-datanode-slave2.log.1
+/home/gavin/project01/Kmeans/slave2/hadoop-root-datanode-slave2.log.2
 输出为：
-/home/gavin/桌面/Kmeans/slave2/hadoop-root-datanode-slave2.log.0.json
-/home/gavin/桌面/Kmeans/slave2/hadoop-root-datanode-slave2.log.1.json
-/home/gavin/桌面/Kmeans/slave2/hadoop-root-datanode-slave2.log.2,json
+/home/gavin/project01/Kmeans/slave2/hadoop-root-datanode-slave2.log.0.json
+/home/gavin/project01/Kmeans/slave2/hadoop-root-datanode-slave2.log.1.json
+/home/gavin/project01/Kmeans/slave2/hadoop-root-datanode-slave2.log.2.json
+
+
+{"时间戳":" 2020-05-14 19:04:13,066","块ID":"BP-1008346802-172.19.2.170-1588909441424:blk_1073744493_3704,","源IP":"172.19.2.174","读/写":"----\u003e写","目的IP":"172.19.2.172"}
+{"时间戳":" 2020-05-14 19:04:13,147","块ID":"BP-1008346802-172.19.2.170-1588909441424:blk_1073744250_3461,","源IP":"172.19.2.172","读/写":"\u003c----读","目的IP":"172.19.2.172"}
+{"时间戳":" 2020-05-14 19:04:13,426","块ID":"BP-1008346802-172.19.2.170-1588909441424:blk_1073744328_3539,","源IP":"172.19.2.172","读/写":"\u003c----读","目的IP":"172.19.2.172"}
+{"时间戳":" 2020-05-14 19:04:13,473","块ID":"BP-1008346802-172.19.2.170-1588909441424:blk_1073744501_3712,","源IP":"172.19.2.174","读/写":"----\u003e写","目的IP":"172.19.2.172"}
+{"时间戳":" 2020-05-14 19:04:13,791","块ID":"BP-1008346802-172.19.2.170-1588909441424:blk_1073744325_3536,","源IP":"172.19.2.172","读/写":"\u003c----读","目的IP":"172.19.2.172"}
+{"时间戳":" 2020-05-14 19:04:14,418","块ID":"BP-1008346802-172.19.2.170-1588909441424:blk_1073744255_3466,","源IP":"172.19.2.172","读/写":"\u003c----读","目的IP":"172.19.2.172"}
+{"时间戳":" 2020-05-14 19:04:14,423","块ID":"BP-1008346802-172.19.2.170-1588909441424:blk_1073744502_3713,","源IP":"172.19.2.172","读/写":"----\u003e写","目的IP":"172.19.2.172"}
+{"时间戳":" 2020-05-14 19:04:19,109","块ID":"BP-1008346802-172.19.2.170-1588909441424:blk_1073744328_3539,","源IP":"172.19.2.172","读/写":"\u003c----读","目的IP":"172.19.2.172"}
