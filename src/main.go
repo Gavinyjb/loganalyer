@@ -6,24 +6,19 @@ import (
 	"flag"
 	"fmt"
 	"os"
-	"src/lru"
+	"src/policy/lru"
 )
 
 type kv struct {
 	BlockId string `json:"块ID"`
-	DestIp  String `json:"目的IP"`
+	DestIp  string `json:"目的IP"`
 }
 
-type String string
-
-func (d String) Len() int {
-	return 1
-}
 func main() {
-
-	hit, unhit := 0, 0
 	srcfile := flag.String("srcfile", "/home/gavin/桌面/test/srcfileKV.json", "K-V文件")
-	maxCache := flag.Int("maxCache", 8, "最大缓存容量:每8代表1Gb，因为blk大小为128M，此处用了1")
+	//maxCaches := flag.Int("maxCaches", "1,2,4,8,16", "最大缓存容量")
+	maxCache := flag.Int("maxCache", 8, "最大缓存容量")
+	//policies := flag.String("policies", "lru,lfu,fifo,mru,clock", "页面置换算法")
 	flag.Parse()
 
 	fd, open := os.Open(*srcfile)
@@ -37,21 +32,31 @@ func main() {
 	var m []kv
 	readString, _ := r.ReadString('\n')
 	json.Unmarshal([]byte(readString), &m)
+	//maxCacheList := strings.Split(*maxCaches, ",")
+	//for _, maxCache := range maxCacheList {
+	//
+	//}
+	cache_hit_ratio(m, *maxCache)
 
-	cache := lru.New(int64(*maxCache), nil)
+}
+
+func cache_hit_ratio(m []kv, maxCache int) {
+	hit, unhit := 0, 0
+	cache := lru.NewCache[string, string](lru.WithCapacity(maxCache))
 	for _, kv := range m {
-		_, ok := cache.Get(kv.BlockId)
+		got, ok := cache.Get(kv.BlockId)
 		if ok {
-			fmt.Println("命中")
+			fmt.Println("命中-----" + got)
 			hit++
 		} else {
-			fmt.Println("未命中")
+			fmt.Println("未命中----" + got)
 			unhit++
-			cache.Add(kv.BlockId, kv.DestIp)
+			cache.Set(kv.BlockId, kv.DestIp)
 		}
+		cache.Show()
 	}
 	var res float64
 	res = float64(hit) / float64(hit+unhit)
-	fmt.Println(res)
-
+	res *= 100
+	fmt.Printf("命中率：%v%%\n", res)
 }
