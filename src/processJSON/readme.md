@@ -1,6 +1,10 @@
-用于将某一个目录下所有json文件按照时间戳从小到大顺序排序并在目录下生成文件。
-eg:go run processjson.go -srcpath=/home/gavin/project01/Kmeans/blk_read
+> 用于将某一个目录下所有json文件按照时间戳从小到大顺序排序并在目录下生成文件。
 
+```bash
+eg:go run processjson.go -srcpath=/home/gavin/project01/Kmeans/blk_read
+```
+
+```bash
 -rw-rw-r--  1 gavin gavin 229172 3月  23 00:46 slave1已排序.json
 -rw-rw-r--  1 gavin gavin 229172 3月  23 00:43 slave1.json
 -rw-rw-r--  1 gavin gavin 121902 3月  23 00:46 slave1KV.json
@@ -13,3 +17,5 @@ eg:go run processjson.go -srcpath=/home/gavin/project01/Kmeans/blk_read
 -rw-rw-r--  1 gavin gavin 238008 3月  23 00:46 slave4已排序.json
 -rw-rw-r--  1 gavin gavin 238008 3月  23 00:44 slave4.json
 -rw-rw-r--  1 gavin gavin 126602 3月  23 00:46 slave4KV.json
+```
+
