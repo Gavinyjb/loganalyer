@@ -13,6 +13,7 @@ import (
 func main() {
 	srcpath := flag.String("srcpath", "/home/gavin", "json文件所在目录")
 	outpath := flag.String("outpath", "/home/gavin/extractread.json", "提取读块文件流目录")
+	tag := flag.String("tag", "r", "标志位，标志提取r,w,r&w")
 	flag.Parse()
 	var files []string
 	err := filepath.Walk(*srcpath, func(path string, info os.FileInfo, err error) error {
@@ -35,28 +36,62 @@ func main() {
 		fdout.Close()
 	}()
 	w := bufio.NewWriter(fdout)
-	for i := range files {
-		//file := files[len(files)-i-1] //文件名字逆序读取
-		file := files[i]
-		fd, err2 := os.Open(file)
-		if err2 != nil {
-			fmt.Println("打开文件报错")
-			fmt.Println(err2)
-		}
-		defer func() {
-			fd.Close()
-		}()
-		r := bufio.NewReader(fd)
-		for {
-			buf, err3 := r.ReadString('\n')
+	var write func(tag string)
+	write = func(tag string) {
+		for i := range files {
+			//file := files[len(files)-i-1] //文件名字逆序读取
+			file := files[i]
+			fd, err2 := os.Open(file)
+			if err2 != nil {
+				fmt.Println("打开文件报错")
+				fmt.Println(err2)
+			}
+			defer func() {
+				fd.Close()
+			}()
+			r := bufio.NewReader(fd)
+			switch tag {
+			case "r":
+				for {
+					buf, err3 := r.ReadString('\n')
 
-			if strings.Contains(buf, "----读") {
-				w.WriteString(buf)
+					if strings.Contains(buf, "----读") {
+						w.WriteString(buf)
+					}
+					if err3 == io.EOF {
+						break
+					}
+				}
+				w.Flush()
+			case "w":
+				for {
+					buf, err3 := r.ReadString('\n')
+
+					if strings.Contains(buf, "----\\u003e写") {
+						w.WriteString(buf)
+					}
+					if err3 == io.EOF {
+						break
+					}
+				}
+				w.Flush()
+			case "r&w", "w&r":
+				for {
+					buf, err3 := r.ReadString('\n')
+
+					if strings.Contains(buf, "----读") || strings.Contains(buf, "----\\u003e写") {
+						w.WriteString(buf)
+					}
+					if err3 == io.EOF {
+						break
+					}
+				}
+				w.Flush()
+
 			}
-			if err3 == io.EOF {
-				break
-			}
+
 		}
-		w.Flush()
 	}
+	write(*tag)
+
 }
