@@ -1,9 +1,8 @@
-package main
+package log
 
 import (
 	"bufio"
 	"encoding/json"
-	"flag"
 	"fmt"
 	"io"
 	"os"
@@ -19,15 +18,24 @@ type wrInfo struct {
 	DestIp    string `json:"目的IP"`
 }
 
-func main() {
-	srcpath := flag.String("srcpath", "/home/gavin/", "log日志路径")
-	//outPath := flag.String("outPath", "/home/gavin/out.txt", "输出文件路径") //eg:/home/gavin/桌面/Kmeans/slave2/res.txt
-
-	//解析命令行参数
-	flag.Parse()
+func creatOutDir(folderPath string) string {
+	if _, err := os.Stat(folderPath); os.IsNotExist(err) {
+		// 必须分成两步：先创建文件夹、再修改权限
+		os.Mkdir(folderPath, 0777) //0777也可以os.ModePerm
+		os.Chmod(folderPath, 0777)
+	}
+	return folderPath
+}
+func LogToJSON(srcPath string) (outDir string) {
+	//删除末尾可能的"/"
+	if srcPath[len(srcPath)-1] == '/' {
+		srcPath = srcPath[:len(srcPath)-1]
+	}
+	//创建输出目录
+	outDir = creatOutDir(srcPath + "/JsonOut/")
 	//获取文件目录文件名列表
 	var files []string
-	err := filepath.Walk(*srcpath, func(path string, info os.FileInfo, err error) error {
+	err := filepath.Walk(srcPath, func(path string, info os.FileInfo, err error) error {
 		//不处理文件夹
 		if info.IsDir() {
 			return nil
@@ -38,10 +46,7 @@ func main() {
 	if err != nil {
 		fmt.Println(err)
 	}
-	//resolute := make([]wrInfo, 0)
-	//nodeList := make(map[string]bool)
 	for _, file := range files {
-		//path := *srcpath + "/" + file
 		fmt.Println(file)
 		// 1.打开一个文件
 		// 注意: 文件不存在不会创建, 会报错
@@ -50,7 +55,6 @@ func main() {
 		if err != nil {
 			fmt.Println(err)
 		}
-
 		// 2.关闭一个文件
 		defer func() {
 			err = fpSrc.Close()
@@ -59,8 +63,8 @@ func main() {
 			}
 		}()
 
-		// 1.打开文件
-		fpDest, err := os.OpenFile(file+".json", os.O_CREATE|os.O_APPEND|os.O_RDWR, 0666)
+		// 1.打开文件(没有会创建文件)
+		fpDest, err := os.OpenFile(outDir+filepath.Base(file)+".json", os.O_CREATE|os.O_APPEND|os.O_RDWR, 0666)
 		if err != nil {
 			fmt.Println(err)
 		}
@@ -101,12 +105,6 @@ func main() {
 				_, err := w.Write(info)
 				_, err = w.WriteString("\n")
 				if err != nil {
-					return
-				}
-				if err != nil {
-					return
-				}
-				if err != nil {
 					fmt.Println(err)
 				}
 				err = w.Flush()
@@ -139,40 +137,17 @@ func main() {
 				_, err := w.Write(info)
 				_, err = w.WriteString("\n")
 				if err != nil {
-					return
-				}
-				if err != nil {
 					fmt.Println(err)
 				}
 				err = w.Flush()
 				if err != nil {
 					fmt.Println("刷新失败")
 				}
-				//nodeList[srcIp] = true
-				//nodeList[destIp] = true
-				//fmt.Println(timestamp, blockId, srcIp,"---->",destIp)
-				//fmt.Println(res)
 			}
 			if err == io.EOF {
 				break
 			}
 		}
 	}
-
-	//for s, _ := range nodeList {
-	//	nodeInfo := make([]wrInfo, 0)
-	//	for _, info := range resolute {
-	//		if info.srcIP == s || info.destIp == s {
-	//			nodeInfo = append(nodeInfo, info)
-	//		}
-	//	}
-	//	w.WriteString(s + "------该节点的读写操作" + `\n`)
-	//	for _, info := range nodeInfo {
-	//		_, err2 := w.WriteString(info.timestamp + info.blockId + info.srcIP + info.wr + info.destIp + `\n`)
-	//		if err2 != nil {
-	//			fmt.Println(err2)
-	//		}
-	//	}
-	//	w.Flush()
-	//}
+	return outDir
 }

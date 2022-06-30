@@ -4,6 +4,7 @@
 
 ```
 eg：go run main.go -policies=lru,lfu,mru,fifo,clock -maxCaches=1,2,4,8 -srcfile=/home/gavin/project01/Kmeans/blk_read/slave1KV.json
+go run main.go -policies=lru,lfu,mru,fifo,clock -maxCaches=1,2,4,8 -srcfile=/Users/gavin/Desktop/loganalyer-master/logs/slave1KV.json
 ```
 
 ```

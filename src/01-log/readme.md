@@ -1,5 +1,9 @@
 > 修改为输入log所在目录
 
+
+```go
+eg：go run log.go -srcpath=/home/gavin/project01/Kmeans/slave2
+```
 ```go
 eg：go run log.go -srcpath=/home/gavin/project01/Kmeans/slave2
 ```

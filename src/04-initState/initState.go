@@ -1,11 +1,11 @@
-package main
+package initState
 
 import (
 	"bufio"
 	"encoding/json"
-	"flag"
 	"fmt"
 	"io"
+	"log"
 	"os"
 	"path/filepath"
 	"sort"
@@ -24,29 +24,39 @@ type kv struct {
 	DestIp  string `json:"目的IP"`
 }
 
-func main() {
-
-	srcpath := flag.String("srcpath", "/home/gavin/example.json", "json文件所在目录")
-	outFile := flag.String("outFile", "", "初始状态各节点拥有的文件块")
-	flag.Parse()
+func InitState(srcpath, outFile string) {
 	var files []string
-	err := filepath.Walk(*srcpath, func(path string, info os.FileInfo, err error) error {
-		//不处理文件夹
-		if info.IsDir() {
-			return nil
-		}
-		//非json文件不处理
-		if filepath.Ext(path) != ".json" {
-			return nil
-		}
-		files = append(files, path)
-		return nil
-	})
+	/*
+		会遍历全部文件
+		err := filepath.Walk(srcpath, func(path string, info os.FileInfo, err error) error {
+				//不处理文件夹
+				if info.IsDir() {
+					return nil
+				}
+				//非json文件不处理
+				if filepath.Ext(path) != ".json" {
+					return nil
+				}
+				files = append(files, path)
+				return nil
+			})
+	*/
+	f, err := os.Open(srcpath)
 	if err != nil {
-		fmt.Println(err)
+		log.Fatal(err)
+	}
+	fileInfos, err := f.Readdir(-1)
+	f.Close()
+	if err != nil {
+		log.Fatal(err)
+	}
+	for _, fileInfo := range fileInfos {
+		if !fileInfo.IsDir() {
+			files = append(files, filepath.Join(srcpath, fileInfo.Name()))
+		}
 	}
 	infoList := make([]wrInfo, 0)
-	wrfd, createrr := os.OpenFile(*outFile+"初始状态.txt", os.O_CREATE|os.O_APPEND|os.O_RDWR, 0666)
+	wrfd, createrr := os.OpenFile(outFile+"初始状态.txt", os.O_CREATE|os.O_APPEND|os.O_RDWR, 0666)
 	if createrr != nil {
 		fmt.Println(createrr)
 	}
@@ -85,8 +95,7 @@ func main() {
 			err := json.Unmarshal(buf, &info)
 			if err != nil {
 				fmt.Println("反序列化出错")
-				fmt.Println(string(buf))
-				fmt.Println()
+				//fmt.Println(string(buf))
 			}
 			//判断有几个节点
 			nodes[info.SrcIP]++
@@ -115,36 +124,36 @@ func main() {
 		}
 	})
 	for s, _ := range nodes {
-		blkinit := make(map[string]int, 0)
+		blkInit := make(map[string]int, 0)
 		for _, info := range infoList {
-			if info.DestIp == s && strings.Contains(info.Wr, "读") && blkinit[info.BlockId] == 0 {
+			if info.DestIp == s && strings.Contains(info.Wr, "读") && blkInit[info.BlockId] == 0 {
 				//  info.Wr == "\\u003c----读" &&
-				blkinit[info.BlockId] = 1
+				blkInit[info.BlockId] = 1
 			}
-			if info.DestIp == s && strings.Contains(info.Wr, "写") && blkinit[info.BlockId] == 0 {
+			if info.DestIp == s && strings.Contains(info.Wr, "写") && blkInit[info.BlockId] == 0 {
 				// info.Wr == "----\\u003e写" &&
-				blkinit[info.BlockId] = -1
+				blkInit[info.BlockId] = -1
 			}
-			//if info.DestIp == s && strings.Contains(info.Wr, "读") && blkinit[info.BlockId] == 1 {
+			//if info.DestIp == s && strings.Contains(info.Wr, "读") && blkInit[info.BlockId] == 1 {
 			//	// info.Wr == "\\u003c----读" &&
-			//	blkinit[info.BlockId] = 1
+			//	blkInit[info.BlockId] = 1
 			//}
-			//if info.DestIp == s && strings.Contains(info.Wr, "写") && blkinit[info.BlockId] == 1 {
+			//if info.DestIp == s && strings.Contains(info.Wr, "写") && blkInit[info.BlockId] == 1 {
 			//	//  info.Wr == "----\\u003e写" &&
 			//	//fmt.Println("之前不是有了吗？写入覆盖？")
 			//}
-			//if info.DestIp == s && strings.Contains(info.Wr, "读") && blkinit[info.BlockId] == -1 {
+			//if info.DestIp == s && strings.Contains(info.Wr, "读") && blkInit[info.BlockId] == -1 {
 			//	//  info.Wr == "\\u003c----读" &&
-			//	blkinit[info.BlockId] = -1
+			//	blkInit[info.BlockId] = -1
 			//}
-			//if info.DestIp == s && strings.Contains(info.Wr, "写") && blkinit[info.BlockId] == -1 {
+			//if info.DestIp == s && strings.Contains(info.Wr, "写") && blkInit[info.BlockId] == -1 {
 			//	//  info.Wr == "----\\u003e写" &&
 			//	//fmt.Println("再次写入覆盖？")
 			//}
 		}
 		w.WriteString(s)
 		w.WriteByte('\n')
-		for s2, i := range blkinit {
+		for s2, i := range blkInit {
 			if i > 0 {
 				//fmt.Println(s2)
 				w.WriteString(s2)
