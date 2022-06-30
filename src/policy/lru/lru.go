@@ -55,21 +55,21 @@ func NewCache[K comparable, V any](opts ...Option) *Cache[K, V] {
 }
 
 // Get looks up a key's value from the cache.
-func (c *Cache[K, V]) Get(key K) (zero V, _ bool) {
-	e, ok := c.items[key]
+func (C *Cache[K, V]) Get(key K) (zero V, _ bool) {
+	e, ok := C.items[key]
 	if !ok {
 		return
 	}
 	// updates cache order
-	c.list.MoveToFront(e)
+	C.list.MoveToFront(e)
 	return e.Value.(*entry[K, V]).val, true
 }
 
 // Set sets a value to the cache with key. replacing any existing value.
-func (c *Cache[K, V]) Set(key K, val V) {
-	if e, ok := c.items[key]; ok {
+func (C *Cache[K, V]) Set(key K, val V) {
+	if e, ok := C.items[key]; ok {
 		// updates cache order
-		c.list.MoveToFront(e)
+		C.list.MoveToFront(e)
 		entry := e.Value.(*entry[K, V])
 		entry.val = val
 		return
@@ -79,18 +79,18 @@ func (c *Cache[K, V]) Set(key K, val V) {
 		key: key,
 		val: val,
 	}
-	e := c.list.PushFront(newEntry)
-	c.items[key] = e
+	e := C.list.PushFront(newEntry)
+	C.items[key] = e
 
-	if c.list.Len() > c.cap {
-		c.deleteOldest()
+	if C.list.Len() > C.cap {
+		C.deleteOldest()
 	}
 }
 
 // Keys returns the keys of the cache. the order is from oldest to newest.
-func (c *Cache[K, V]) Keys() []K {
-	keys := make([]K, 0, len(c.items))
-	for ent := c.list.Back(); ent != nil; ent = ent.Prev() {
+func (C *Cache[K, V]) Keys() []K {
+	keys := make([]K, 0, len(C.items))
+	for ent := C.list.Back(); ent != nil; ent = ent.Prev() {
 		entry := ent.Value.(*entry[K, V])
 		keys = append(keys, entry.key)
 	}
@@ -98,29 +98,29 @@ func (c *Cache[K, V]) Keys() []K {
 }
 
 // Len returns the number of items in the cache.
-func (c *Cache[K, V]) Len() int {
-	return c.list.Len()
+func (C *Cache[K, V]) Len() int {
+	return C.list.Len()
 }
 
 // Delete deletes the item with provided key from the cache.
-func (c *Cache[K, V]) Delete(key K) {
-	if e, ok := c.items[key]; ok {
-		c.delete(e)
+func (C *Cache[K, V]) Delete(key K) {
+	if e, ok := C.items[key]; ok {
+		C.delete(e)
 	}
 }
 
-func (c *Cache[K, V]) deleteOldest() {
-	e := c.list.Back()
-	c.delete(e)
+func (C *Cache[K, V]) deleteOldest() {
+	e := C.list.Back()
+	C.delete(e)
 }
 
-func (c *Cache[K, V]) delete(e *list.Element) {
-	c.list.Remove(e)
+func (C *Cache[K, V]) delete(e *list.Element) {
+	C.list.Remove(e)
 	entry := e.Value.(*entry[K, V])
-	delete(c.items, entry.key)
+	delete(C.items, entry.key)
 }
-func (c *Cache[K, V]) Show() {
-	for i := c.list.Front(); i != nil; i = i.Next() {
+func (C *Cache[K, V]) Show() {
+	for i := C.list.Front(); i != nil; i = i.Next() {
 		fmt.Println(i.Value)
 	}
 }

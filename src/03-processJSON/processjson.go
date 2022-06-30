@@ -1,3 +1,4 @@
+// package processJSON
 package main
 
 import (
@@ -24,12 +25,10 @@ type kv struct {
 	DestIp  string `json:"目的IP"`
 }
 
-func main() {
-
-	srcpath := flag.String("srcpath", "/home/gavin/example.json", "json文件所在目录")
-	flag.Parse()
-	var files []string
-	err := filepath.Walk(*srcpath, func(path string, info os.FileInfo, err error) error {
+// MergerNodeJson 合并同一个节点的日志文件
+func MergerNodeJson(srcpath string) {
+	var filesNew []string
+	filepath.Walk(srcpath, func(path string, info os.FileInfo, err error) error {
 		//不处理文件夹
 		if info.IsDir() {
 			return nil
@@ -38,14 +37,63 @@ func main() {
 		if filepath.Ext(path) != ".json" {
 			return nil
 		}
-		files = append(files, path)
+		filesNew = append(filesNew, path)
 		return nil
 	})
-	if err != nil {
-		fmt.Println(err)
-	}
-	for _, file := range files {
 
+	for _, file := range filesNew {
+		fd, err2 := os.Open(file)
+		if err2 != nil {
+			fmt.Println("打开文件报错")
+			fmt.Println(err2)
+		}
+		defer func() {
+			err := fd.Close()
+			if err != nil {
+				fmt.Println(err)
+			}
+		}()
+		r := bufio.NewReader(fd)
+		FileName := strings.Split(file, ".")
+		wrfd, _ := os.OpenFile(FileName[0]+".json", os.O_CREATE|os.O_APPEND|os.O_RDWR, 0666)
+		defer func() {
+			closeerr := wrfd.Close()
+			if closeerr != nil {
+				fmt.Println(closeerr)
+			}
+		}()
+		w := bufio.NewWriter(wrfd)
+		for {
+			buf, err3 := r.ReadBytes('\n')
+			if err3 == io.EOF {
+				break
+			}
+			if err3 != nil {
+				fmt.Println(err3)
+			}
+			w.Write(buf)
+		}
+		w.Flush()
+		os.Remove(file)
+	}
+}
+
+// ProcessJSON 处理文件
+func ProcessJSON(srcpath string) (kvFilePath string) {
+	var filesNew []string
+	filepath.Walk(srcpath, func(path string, info os.FileInfo, err error) error {
+		//不处理文件夹
+		if info.IsDir() {
+			return nil
+		}
+		//非json文件不处理
+		if filepath.Ext(path) != ".json" {
+			return nil
+		}
+		filesNew = append(filesNew, path)
+		return nil
+	})
+	for _, file := range filesNew {
 		infoList := make([]wrInfo, 0)
 		fd, err2 := os.Open(file)
 		if err2 != nil {
@@ -60,6 +108,7 @@ func main() {
 		}()
 		r := bufio.NewReader(fd)
 		wrfd, createrr := os.OpenFile(strings.TrimRight(file, ".json")+"已排序.json", os.O_CREATE|os.O_APPEND|os.O_RDWR, 0666)
+		//wrfd, createrr := os.OpenFile(strings.TrimRight(file, ".json")+"已排序.json", os.O_CREATE|os.O_APPEND|os.O_RDWR, 0666)
 		if createrr != nil {
 			fmt.Println(createrr)
 		}
@@ -76,7 +125,7 @@ func main() {
 				break
 			}
 			if err3 != nil {
-				fmt.Println(err)
+				fmt.Println(err3)
 			}
 			var info wrInfo
 			err := json.Unmarshal(buf, &info)
@@ -111,6 +160,7 @@ func main() {
 			w.WriteByte('\n')
 		}
 		w.Flush()
+		kvFilePath = strings.TrimRight(file, ".json") + "KV.json"
 		mapfd, maperr := os.OpenFile(strings.TrimRight(file, ".json")+"KV.json", os.O_CREATE|os.O_APPEND|os.O_RDWR, 0666)
 		if maperr != nil {
 			fmt.Println(maperr)
@@ -138,4 +188,13 @@ func main() {
 		wmap.Flush()
 
 	}
+	return kvFilePath
+}
+
+func main() {
+	srcpath := flag.String("input", "./jsonDir", "json文件所在目录")
+	flag.Parse()
+
+	//MergerNodeJson(*srcpath)
+	ProcessJSON(*srcpath)
 }
