@@ -4,6 +4,7 @@ package main
 import (
 	"../policy/clock"
 	"../policy/fifo"
+	lru2 "../policy/golang-lru"
 	"../policy/lfu"
 	"../policy/lru"
 	"../policy/mru"
@@ -11,7 +12,6 @@ import (
 	"encoding/json"
 	"flag"
 	"fmt"
-	lru2 "github.com/hashicorp/golang-lru"
 	"os"
 	"strconv"
 	"strings"
