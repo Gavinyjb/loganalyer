@@ -1,4 +1,4 @@
-> 用于将某一个目录下所有json文件按照时间戳从小到大顺序排序并在目录下生成文件。
+> 用于将步骤二获得的json文件变成我们需要的KV文件 。
 
 ![image-20221110211605793](https://cdn.jsdelivr.net/gh/Gavinyjb/images@master/images/202211102116907.png)
 

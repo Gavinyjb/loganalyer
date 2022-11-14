@@ -1,4 +1,4 @@
-> 用于提取某一个目录下所有json文件中的读取块数据流
+> 用于提取单个目录下单一结点经过步骤一获取到的json文件中的读取块数据流
 
 ![image-20221110211219503](https://cdn.jsdelivr.net/gh/Gavinyjb/images@master/images/202211102112586.png)
 
